@@ -6,7 +6,10 @@ libgen = LibgenSearch()
 
 class SearchRequest():
     def __init__(self, is_fiction, author, title, year):
-        self.base_fiction_url = 'https://libgen.is/fiction/?q='
+        self.base_fiction_url = 'https://libgen.is/fiction/'
+        self.acceptable_extensions = ['epub']
+        # self.language = 'English'
+
         self.is_fiction = is_fiction
         self.author = author
         self.title = title
@@ -28,15 +31,24 @@ class SearchRequest():
         """
         Search for fiction novel using the given author, title, and filters.
         """
-        query = (self.author + ' ' + self.title).replace(' ', '+')
-        url = self.base_fiction_url + query
-        print(url)
-        response = requests.get(url)
-        soup = BeautifulSoup(response.content, 'html.parser')
-        # assuming that the content was found. Need to still check if the request found actual values
-        table_rows = soup.find('table', class_='catalog').tbody.find_all('tr')
-        print(len(table_rows))
-    
+        results = []
+        for format in self.acceptable_extensions:
+            query = (self.author + ' ' + self.title).replace(' ', '+')
+            url = self.base_fiction_url + '?q=' + query + '&format=' + format
+            response = requests.get(url)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            if soup.body.p.string == 'No files were found.':
+                return None
+            # assuming that the content was found
+            table_rows = soup.find('table', class_='catalog').tbody.find_all('tr')
+            for row in table_rows:
+                cols = row.find_all('td')
+                title = cols[2].a.string
+                extension = cols[4].string.split('/')[0].strip().lower()
+                mirrors = [{'source': li.a['title'], 'url': li.a['href']} for li in cols[5].ul.find_all('li')]
+                results.append({'title': title, 'extension': extension, 'mirrors': mirrors})
+        return results
+
     def search(self):
         if self.is_fiction:
             return self._search_fictional()

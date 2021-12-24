@@ -39,5 +39,6 @@ if __name__ == "__main__":
     else:
         inputs = menu()
         searchrequest = SearchRequest(is_fiction=inputs['is_fiction'], title=inputs['title'], author=inputs['author'], year=inputs['year'])
-    searchrequest.search()
-    # pprint(search_title("the sword of kaigen"))
+    results = searchrequest.search()
+    pprint(results)
+    
