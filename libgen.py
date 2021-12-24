@@ -1,7 +1,11 @@
+from libgen_api import LibgenSearch
 import pyinputplus as pyip
+import requests
+import re
 from argparse import ArgumentParser
 from search import SearchRequest
 from pprint import pprint
+libgen = LibgenSearch()
 
 test_is_fiction = True
 test_title = 'sword of kaigen'
@@ -28,6 +32,24 @@ def menu():
 
     # extension = pyip.
 
+def write_file(download_links, path=""):
+    response = requests.get(download_links['GET'], allow_redirects=True)
+    filename = getFilename_fromCd(response.headers.get('content-disposition')) 
+    print(filename)
+    with open(filename, 'wb') as file:
+        file.write(response.content)
+
+
+def getFilename_fromCd(cd):
+    """
+    Get filename from content-disposition
+    """
+    if not cd:
+        return None
+    fname = re.findall('filename=(.+)', cd)
+    if len(fname) == 0:
+        return None
+    return fname[0]
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -40,5 +62,6 @@ if __name__ == "__main__":
         inputs = menu()
         searchrequest = SearchRequest(is_fiction=inputs['is_fiction'], title=inputs['title'], author=inputs['author'], year=inputs['year'])
     results = searchrequest.search()
-    pprint(results)
-    
+    # resolving first result's first mirror link into a download link
+    download_links = libgen.resolve_download_links({'Mirror_1': results[0]['mirrors'][0]['url']})
+    write_file(download_links)
