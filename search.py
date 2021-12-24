@@ -35,6 +35,7 @@ class SearchRequest():
         for format in self.acceptable_extensions:
             query = (self.author + ' ' + self.title).replace(' ', '+')
             url = self.base_fiction_url + '?q=' + query + '&format=' + format
+            print('URL:', url)
             response = requests.get(url)
             soup = BeautifulSoup(response.content, 'html.parser')
             if soup.body.p.string == 'No files were found.':
