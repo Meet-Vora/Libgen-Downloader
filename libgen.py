@@ -30,7 +30,7 @@ def menu():
     return {'is_fiction': is_fiction, 'author': author.lower(), 'title': title.lower(), 'year': year}
 
 
-def write_file(download_links, path="/home/meetv/Documents/Books"):
+def write_file(download_links, path):
     response = requests.get(download_links['GET'], allow_redirects=True)
     filename = getFilename_fromCd(response.headers.get('content-disposition')) 
     with open(os.path.join(path, filename), 'wb') as file:
@@ -64,4 +64,14 @@ if __name__ == "__main__":
     # resolving first result's first mirror link into a download link. Passed in hardcoded
     # dictionary by looking at LibgenAPI's source code: https://github.com/harrison-broadbent/libgen-api/blob/master/libgen_api/libgen_search.py#L33-L39
     download_links = libgen.resolve_download_links({'Mirror_1': results[0]['mirrors'][0]['url']})
+    
+    # writes file to default path
+    path = "/home/meetv/Documents/Books"
     write_file(download_links)
+
+    # converts file to azw3 format
+    
+
+    # writes azw3 file to same default path
+
+    # copies azw3 file to kindle if directory exists
